@@ -1,0 +1,139 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report an Item | CampusFind</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="navbar">
+    <a class="brand" href="index.html">
+      <span class="brand-icon">CF</span>
+      <span>CampusFind<small>SCHOOL LOST & FOUND</small></span>
+    </a>
+    
+<nav>
+  <a class="nav-link" href="index.html">Home</a>
+  <a class="nav-link active" href="browse.html">Browse Items</a>
+  <a class="nav-link" href="report.html">Report an Item</a>
+  <a class="nav-link" href="admin.html">Admin</a>
+</nav>
+      <a class="nav-link" href="index.html">Home</a>
+      <a class="nav-link" href="browse.html">Browse Items</a>
+      <a class="nav-link active" href="report.html">Report an Item</a>
+    </nav>
+  </header>
+
+  <main class="page narrow">
+    <section class="page-intro">
+      <span class="eyebrow">CAMPUS LOST & FOUND</span>
+      <h1>School Lost-and-Found Reporting Form</h1>
+      <p>
+        Use this form to report an item you have lost or found on school
+        premises. Provide accurate details so the item can be identified
+        and returned to its rightful owner. Do not include passwords
+        or sensitive personal information.
+      </p>
+    </section>
+
+    <form id="reportForm" class="form-card">
+
+      <fieldset class="question-card">
+        <legend>1. What are you reporting? <span class="required">*</span></legend>
+        <label class="choice">
+          <input type="radio" name="itemType" value="Lost item" required>
+          Lost item
+        </label>
+        <label class="choice">
+          <input type="radio" name="itemType" value="Found item">
+          Found item
+        </label>
+      </fieldset>
+
+      <section class="question-card">
+        <label for="itemName">
+          2. What item is involved? <span class="required">*</span>
+        </label>
+        <p class="hint">Example: Water bottle, umbrella, notebook, pencil case.</p>
+        <input id="itemName" name="itemName" required maxlength="100"
+          placeholder="Enter the item name">
+      </section>
+
+      <section class="question-card">
+        <label for="itemDescription">
+          3. Describe the item <span class="required">*</span>
+        </label>
+        <p class="hint">Example: Color, brand, shape, or identifying features.</p>
+        <textarea id="itemDescription" name="itemDescription"
+          required maxlength="500" rows="4"
+          placeholder="Describe the item in detail"></textarea>
+      </section>
+
+      <fieldset class="question-card">
+        <legend>4. Where was it lost or found? <span class="required">*</span></legend>
+
+        <label class="choice">
+          <input type="radio" name="itemLocation" value="Classroom" required>
+          Classroom
+        </label>
+        <label class="choice">
+          <input type="radio" name="itemLocation" value="Library">
+          Library
+        </label>
+        <label class="choice">
+          <input type="radio" name="itemLocation" value="Canteen">
+          Canteen
+        </label>
+        <label class="choice">
+          <input type="radio" name="itemLocation" value="Gymnasium">
+          Gymnasium
+        </label>
+        <label class="choice">
+          <input type="radio" name="itemLocation" value="School grounds">
+          School grounds
+        </label>
+        <label class="choice">
+          <input type="radio" name="itemLocation" value="Other" id="otherLocationRadio">
+          Other
+        </label>
+
+        <input id="otherLocation" name="otherLocation" maxlength="100"
+          placeholder="Specify another location" disabled>
+      </fieldset>
+
+      <section class="question-card">
+        <label for="itemDate">
+          5. When was it lost or found? <span class="required">*</span>
+        </label>
+        <p class="hint">The date the item was lost or discovered.</p>
+        <input id="itemDate" name="itemDate" type="date" required>
+      </section>
+
+      <section class="question-card">
+        <label for="claimLocation">
+          6. Where can the item be claimed or turned in?
+          <span class="required">*</span>
+        </label>
+        <p class="hint">
+          Example: School office or designated lost-and-found desk.
+          Have a teacher approve the designated location.
+        </p>
+        <input id="claimLocation" name="claimLocation" required
+          maxlength="150" placeholder="Enter the designated location">
+      </section>
+
+      <button class="button primary full-width" type="submit">
+        Submit Report
+      </button>
+
+      <p id="formMessage" class="form-message" role="status"></p>
+      <p class="muted small">* Required questions</p>
+    </form>
+  </main>
+
+  <footer>CampusFind · School Lost & Found Prototype</footer>
+  <script src="app.js"></script>
+</body>
+</html>

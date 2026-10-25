@@ -1,0 +1,60 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browse Items | CampusFind</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="navbar">
+    <a class="brand" href="index.html">
+      <span class="brand-icon">CF</span>
+      <span>CampusFind<small>SCHOOL LOST & FOUND</small></span>
+    </a>
+   
+<nav>
+  <a class="nav-link" href="index.html">Home</a>
+  <a class="nav-link active" href="browse.html">Browse Items</a>
+  <a class="nav-link" href="report.html">Report an Item</a>
+  <a class="nav-link" href="admin.html">Admin</a>
+</nav>
+      <a class="nav-link" href="index.html">Home</a>
+      <a class="nav-link active" href="browse.html">Browse Items</a>
+      <a class="nav-link" href="report.html">Report an Item</a>
+    </nav>
+  </header>
+
+  <main class="page">
+    <section class="page-intro">
+      <span class="eyebrow">ITEM DIRECTORY</span>
+      <h1>Browse reports</h1>
+      <p>Search for lost and found belongings reported around your school.</p>
+    </section>
+
+    <section class="search-panel">
+      <label for="searchInput">Search by item or location</label>
+      <input id="searchInput" type="search"
+        placeholder="e.g. water bottle, library, classroom">
+
+      <label for="statusFilter">Filter by report status</label>
+      <select id="statusFilter">
+        <option value="all">All reports</option>
+        <option value="Unclaimed">Awaiting claim</option>
+        <option value="Claimed">Claimed</option>
+      </select>
+    </section>
+
+    <div class="results-heading">
+      <h2>Reported items</h2>
+      <span id="resultCount" class="muted"></span>
+    </div>
+
+    <div id="browseItems" class="item-grid"></div>
+  </main>
+
+  <footer>CampusFind · School Lost & Found Prototype</footer>
+  <script src="app.js"></script>
+</body>
+</html>

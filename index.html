@@ -1,0 +1,77 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CampusFind | Home</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="navbar">
+    <a class="brand" href="index.html">
+      <span class="brand-icon">CF</span>
+      <span>CampusFind<small>SCHOOL LOST & FOUND</small></span>
+    </a>
+    <nav>
+      <a class="nav-link active" href="index.html">Home</a>
+      <a class="nav-link" href="browse.html">Browse Items</a>
+      <a class="nav-link" href="report.html">Report an Item</a>
+    </nav>
+  </header>
+
+  <main class="page">
+    <section class="hero">
+      <span class="eyebrow">YOUR SCHOOL'S LOST & FOUND PORTAL</span>
+      <h1>Lost something?<br><span>Let's find it.</span></h1>
+      <p>A central place for students to report found belongings
+      and search for missing items around campus.</p>
+      <div class="hero-actions">
+        <a class="button primary" href="browse.html">Browse Items →</a>
+        <a class="button secondary" href="report.html">＋ Report an Item</a>
+      </div>
+      <div class="hero-note">Simple. Organized. Made for your school.</div>
+    </section>
+
+    <section class="stats">
+      <article class="stat-card">
+        <span class="stat-icon">▤</span>
+        <p>Total reports</p>
+        <strong id="totalCount">0</strong>
+      </article>
+      <article class="stat-card">
+        <span class="stat-icon">⌕</span>
+        <p>Items awaiting claims</p>
+        <strong id="unclaimedCount">0</strong>
+      </article>
+      <article class="stat-card">
+        <span class="stat-icon">✓</span>
+        <p>Items claimed</p>
+        <strong id="claimedCount">0</strong>
+      </article>
+    </section>
+
+    <section class="section">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">RECENT ACTIVITY</span>
+          <h2>Recently reported items</h2>
+        </div>
+        <a class="text-link" href="browse.html">View all →</a>
+      </div>
+      <div id="recentItems" class="item-grid"></div>
+    </section>
+
+    <section class="help-banner">
+      <div>
+        <h2>Found something on campus?</h2>
+        <p>Help reunite a lost belonging with its owner.</p>
+      </div>
+      <a class="button light" href="report.html">Submit a report →</a>
+    </section>
+  </main>
+
+  <footer>CampusFind · School Lost & Found Prototype</footer>
+  <script src="app.js"></script>
+</body>
+</html>

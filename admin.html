@@ -1,0 +1,237 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard | HNHS Campus</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .admin-panel {
+      background: white;
+      border: 1px solid #e0e7e2;
+      border-radius: 14px;
+      padding: 24px;
+      margin: 22px 0;
+    }
+
+    .admin-report {
+      border: 1px solid #e0e7e2;
+      border-radius: 10px;
+      padding: 16px;
+      margin-top: 14px;
+      overflow-wrap: anywhere;
+    }
+
+    .admin-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .danger {
+      background: #fff0f0;
+      color: #a32121;
+    }
+
+    .login-box {
+      max-width: 440px;
+      margin: 40px auto;
+    }
+
+    .admin-report p {
+      margin: 6px 0;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <a class="brand" href="index.html">
+      <span class="brand-icon">HN</span>
+      <span>HNHS Campus<small>ADMINISTRATION</small></span>
+    </a>
+    <nav>
+      <a class="nav-link" href="index.html">Home</a>
+      <a class="nav-link" href="browse.html">Browse Items</a>
+      <a class="nav-link" href="report.html">Report an Item</a>
+    </nav>
+  </header>
+
+  <main class="page">
+    <section class="page-intro">
+      <span class="eyebrow">ADMINISTRATION</span>
+      <h1>Admin Dashboard</h1>
+      <p>Manage submitted school lost-and-found reports.</p>
+    </section>
+
+    <section id="loginPanel" class="admin-panel login-box">
+      <h2>Administrator Login</h2>
+      <p class="muted">
+        Demo access for your local prototype.
+      </p>
+
+      <form id="loginForm">
+        <label for="adminPassword">Admin password</label>
+        <input id="adminPassword" type="password"
+          autocomplete="current-password" required>
+        <button class="button primary full-width" type="submit">
+          Log In
+        </button>
+        <p id="loginMessage" class="form-message" role="status"></p>
+      </form>
+    </section>
+
+    <section id="dashboard" class="admin-panel" hidden>
+      <div class="section-heading">
+        <div>
+          <h2>Submitted Reports</h2>
+          <p id="adminCount" class="muted"></p>
+        </div>
+        <button id="logoutButton" class="button secondary" type="button">
+          Log Out
+        </button>
+      </div>
+
+      <p class="muted">
+        Only delete reports when appropriate. Deletion cannot be undone.
+      </p>
+      <div id="adminReports"></div>
+    </section>
+  </main>
+
+  <footer>HNHS Campus · Lost & Found Administration</footer>
+
+  <script>
+    // DEMO ONLY: this password is visible in the website's source code.
+    // Do not use this as security for real student information.
+    const ADMIN_PASSWORD = "HNHS-NSF";
+    const STORAGE_KEY = "campusFindReports";
+
+    const loginPanel = document.getElementById("loginPanel");
+    const dashboard = document.getElementById("dashboard");
+    const loginForm = document.getElementById("loginForm");
+    const loginMessage = document.getElementById("loginMessage");
+    const adminReports = document.getElementById("adminReports");
+    const adminCount = document.getElementById("adminCount");
+
+    function getReports() {
+      try {
+        const reports = JSON.parse(
+          localStorage.getItem(STORAGE_KEY) || "[]"
+        );
+        return Array.isArray(reports) ? reports : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveReports(reports) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(reports));
+    }
+
+    function addText(parent, tag, text, className) {
+      const element = document.createElement(tag);
+      element.textContent = text;
+      if (className) element.className = className;
+      parent.appendChild(element);
+      return element;
+    }
+
+    function renderReports() {
+      const reports = getReports();
+      adminCount.textContent = reports.length + " report(s)";
+
+      adminReports.replaceChildren();
+
+      if (reports.length === 0) {
+        addText(adminReports, "p", "No reports have been submitted yet.", "muted");
+        return;
+      }
+
+      reports.forEach(report => {
+        const card = document.createElement("article");
+        card.className = "admin-report";
+
+        addText(card, "h3", report.name || "Unnamed item");
+        addText(card, "p", "Type: " + (report.type || "Not specified"));
+        addText(card, "p", "Description: " + (report.description || "None"));
+        addText(card, "p", "Lost/found at: " + (report.location || "Not specified"));
+        addText(card, "p", "Date: " + (report.date || "Not specified"));
+        addText(card, "p", "Claim/turn-in location: " + (report.claimLocation || "Not specified"));
+        addText(card, "p", "Status: " + (report.status || "Unclaimed"));
+
+        const actions = document.createElement("div");
+        actions.className = "admin-actions";
+
+        const statusButton = document.createElement("button");
+        statusButton.type = "button";
+        statusButton.className = "button primary";
+        statusButton.textContent =
+          report.status === "Claimed" ? "Mark Unclaimed" : "Mark Claimed";
+
+        statusButton.addEventListener("click", () => {
+          const latest = getReports();
+          const target = latest.find(item => item.id === report.id);
+
+          if (!target) return;
+
+          target.status =
+            target.status === "Claimed" ? "Unclaimed" : "Claimed";
+
+          try {
+            saveReports(latest);
+            renderReports();
+          } catch {
+            alert("Could not save the change.");
+          }
+        });
+
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.className = "button danger";
+        deleteButton.textContent = "Delete Report";
+
+        deleteButton.addEventListener("click", () => {
+          if (!confirm("Permanently delete this report?")) return;
+
+          try {
+            saveReports(getReports().filter(item => item.id !== report.id));
+            renderReports();
+          } catch {
+            alert("Could not delete the report.");
+          }
+        });
+
+        actions.append(statusButton, deleteButton);
+        card.appendChild(actions);
+        adminReports.appendChild(card);
+      });
+    }
+
+    loginForm.addEventListener("submit", event => {
+      event.preventDefault();
+
+      const enteredPassword =
+        document.getElementById("adminPassword").value;
+
+      if (enteredPassword !== ADMIN_PASSWORD) {
+        loginMessage.textContent = "Incorrect password. Try again.";
+        return;
+      }
+
+      loginPanel.hidden = true;
+      dashboard.hidden = false;
+      loginMessage.textContent = "";
+      renderReports();
+    });
+
+    document.getElementById("logoutButton").addEventListener("click", () => {
+      dashboard.hidden = true;
+      loginPanel.hidden = false;
+      loginForm.reset();
+    });
+  </script>
+</body>
+</html>
