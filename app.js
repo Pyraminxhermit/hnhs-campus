@@ -17,7 +17,7 @@ function databaseReady() {
 }
 
 const db = databaseReady()
-  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLIC_KEY)
+  ? window.supabase.createClient(https://fkvngsxqycdxoqjconsj.supabase.co, sb_publishable_gyj-VHnJsQ6vHFXJaUTRLA_V1I_5Fwi)
   : null;
 
 function escapeHTML(value) {
