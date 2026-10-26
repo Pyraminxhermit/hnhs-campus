@@ -5,7 +5,7 @@
   and a Publishable key (or legacy anon key). NEVER use a Secret/service_role key here.
 */
 const SUPABASE_URL = "https://fkvngsxqycdxoqjconsj.supabase.co";
-const SUPABASE_PUBLIC_KEY = "PASTE_YOUR_ACTUAL_PUBLISHABLE_KEY_HERE";
+const SUPABASE_PUBLIC_KEY = "sb_publishable_gyj-VHnJsQ6vHFXJaUTRLA_V1I_5Fwi";
 const REPORTS_TABLE = "reports";
 
 function databaseReady() {
