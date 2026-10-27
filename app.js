@@ -1,41 +1,101 @@
 /*
-  HNHS Campus Lost-and-Found
-  This version stores reports in Supabase so reports can be shared across devices.
-  Replace the two configuration placeholders below with your Supabase Project URL
-  and a Publishable key (or legacy anon key). NEVER use a Secret/service_role key here.
+  HNHS Campus shared lost-and-found reports.
+  Uses the Supabase REST API directly.
+  Use only a Publishable key in browser code.
+  NEVER put a Secret/service_role key here.
 */
-const SUPABASE_URL = "https://fkvngsxqycdxoqjconsj.supabase.co";
-const SUPABASE_PUBLIC_KEY = "sb_publishable_gyj-VHnJsQ6vHFXJaUTRLA_V1I_5Fwi";
-const REPORTS_TABLE = "reports";
 
-function databaseReady() {
-  return window.supabase &&
+const SUPABASE_URL =
+  "https://fkvngsxqycdxoqjconsj.supabase.co";
+
+const SUPABASE_PUBLIC_KEY =
+  "sb_publishable_gyj-VHnJsQ6vHFXJaUTRLA_V1I_5Fwi";
+
+const REPORTS_ENDPOINT =
+  `${SUPABASE_URL}/rest/v1/reports`;
+
+function isDatabaseConfigured() {
+  return (
     SUPABASE_URL.startsWith("https://") &&
     !SUPABASE_URL.includes("PASTE_") &&
-    SUPABASE_PUBLIC_KEY &&
-    !SUPABASE_PUBLIC_KEY.includes("PASTE_");
+    SUPABASE_PUBLIC_KEY.startsWith("sb_publishable_") &&
+    !SUPABASE_PUBLIC_KEY.includes("PASTE_")
+  );
 }
 
-const db = databaseReady()
-  ? window.supabase.createClient(https://fkvngsxqycdxoqjconsj.supabase.co, sb_publishable_gyj-VHnJsQ6vHFXJaUTRLA_V1I_5Fwi)
-  : null;
+function apiHeaders(extra = {}) {
+  return {
+    apikey: SUPABASE_PUBLIC_KEY,
+    Authorization: `Bearer ${SUPABASE_PUBLIC_KEY}`,
+    ...extra
+  };
+}
+
+async function requestReports(url, options = {}) {
+  if (!isDatabaseConfigured()) {
+    throw new Error(
+      "The Supabase Project URL or Publishable key is missing in app.js."
+    );
+  }
+
+  let response;
+
+  try {
+    response = await fetch(url, {
+      ...options,
+      headers: apiHeaders(options.headers || {})
+    });
+  } catch {
+    throw new Error(
+      "Could not reach Supabase. Check your internet connection and Project URL."
+    );
+  }
+
+  if (!response.ok) {
+    let details = "";
+
+    try {
+      const body = await response.json();
+      details =
+        body.message ||
+        body.details ||
+        body.hint ||
+        body.error_description ||
+        "";
+    } catch {
+      // The server may return a non-JSON error response.
+    }
+
+    throw new Error(
+      details || `Supabase request failed (HTTP ${response.status}).`
+    );
+  }
+
+  if (response.status === 204) return null;
+
+  const text = await response.text();
+  return text ? JSON.parse(text) : null;
+}
 
 function escapeHTML(value) {
-  return String(value ?? "").replace(/[&<>"']/g, char => ({
+  return String(value ?? "").replace(/[&<>"']/g, character => ({
     "&": "&amp;",
     "<": "&lt;",
     ">": "&gt;",
     '"': "&quot;",
     "'": "&#39;"
-  })[char]);
+  })[character]);
 }
 
 function showEmpty(container, message) {
   if (!container) return;
+
   container.replaceChildren();
+
   const empty = document.createElement("div");
   empty.className = "empty-state";
   empty.textContent = message;
+
   container.appendChild(empty);
 }
 
@@ -54,24 +114,38 @@ function mapDatabaseRow(row) {
 }
 
 async function loadItems() {
-  if (!db) {
-    throw new Error("Supabase is not configured. Add your Project URL and public key near the top of app.js.");
-  }
+  const url =
+    `${REPORTS_ENDPOINT}?select=*&order=created_at.desc`;
 
-  const { data, error } = await db
-    .from(REPORTS_TABLE)
-    .select("*")
-    .order("created_at", { ascending: false });
+  const rows = await requestReports(url, {
+    method: "GET",
+    headers: {
+      Accept: "application/json"
+    }
+  });
 
-  if (error) throw error;
-  return (data || []).map(mapDatabaseRow);
+  return (Array.isArray(rows) ? rows : []).map(mapDatabaseRow);
+}
+
+async function insertItem(item) {
+  return requestReports(REPORTS_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Prefer: "return=minimal"
+    },
+    body: JSON.stringify(item)
+  });
 }
 
 function createItemCard(item) {
   const card = document.createElement("article");
   card.className = "item-card";
+
   const isClaimed = item.status === "Claimed";
-  const statusClass = isClaimed ? "status claimed" : "status";
+  const statusClass = isClaimed
+    ? "status claimed"
+    : "status";
 
   card.innerHTML = `
     <span class="item-symbol">🎒</span>
@@ -81,8 +155,11 @@ function createItemCard(item) {
     <p>${escapeHTML(item.description)}</p>
     <p>📅 Date: ${escapeHTML(item.date)}</p>
     <p>🏫 Claim/turn-in location: ${escapeHTML(item.claimLocation)}</p>
-    <span class="${statusClass}">${escapeHTML(item.status)}</span>
+    <span class="${statusClass}">
+      ${escapeHTML(item.status)}
+    </span>
   `;
+
   return card;
 }
 
@@ -91,26 +168,44 @@ async function renderHome() {
   const unclaimed = document.getElementById("unclaimedCount");
   const claimed = document.getElementById("claimedCount");
   const container = document.getElementById("recentItems");
+
   if (!total || !unclaimed || !claimed || !container) return;
 
   try {
     const items = await loadItems();
+
     total.textContent = items.length;
-    unclaimed.textContent = items.filter(item => item.status !== "Claimed").length;
-    claimed.textContent = items.filter(item => item.status === "Claimed").length;
+
+    unclaimed.textContent = items.filter(
+      item => item.status !== "Claimed"
+    ).length;
+
+    claimed.textContent = items.filter(
+      item => item.status === "Claimed"
+    ).length;
 
     if (items.length === 0) {
-      showEmpty(container, "No reports yet. Be the first to submit a report!");
+      showEmpty(
+        container,
+        "No reports yet. Be the first to submit a report!"
+      );
       return;
     }
 
     container.replaceChildren();
-    items.slice(0, 3).forEach(item => container.appendChild(createItemCard(item)));
+
+    items.slice(0, 3).forEach(item => {
+      container.appendChild(createItemCard(item));
+    });
   } catch (error) {
     total.textContent = "—";
     unclaimed.textContent = "—";
     claimed.textContent = "—";
-    showEmpty(container, `Could not load reports. ${error.message}`);
+
+    showEmpty(
+      container,
+      `Could not load reports. ${error.message}`
+    );
   }
 }
 
@@ -119,99 +214,188 @@ function renderBrowse() {
   const searchInput = document.getElementById("searchInput");
   const statusFilter = document.getElementById("statusFilter");
   const resultCount = document.getElementById("resultCount");
-  if (!container || !searchInput || !statusFilter || !resultCount) return;
+
+  if (
+    !container ||
+    !searchInput ||
+    !statusFilter ||
+    !resultCount
+  ) return;
 
   let allItems = [];
 
   function updateResults() {
     const query = searchInput.value.trim().toLowerCase();
     const status = statusFilter.value;
+
     const matches = allItems.filter(item => {
       const searchableText = [
-        item.type, item.name, item.location, item.description,
-        item.date, item.claimLocation
+        item.type,
+        item.name,
+        item.location,
+        item.description,
+        item.date,
+        item.claimLocation
       ].join(" ").toLowerCase();
+
       const matchesQuery = searchableText.includes(query);
-      const matchesStatus = status === "all" || item.status === status;
+
+      const matchesStatus =
+        status === "all" || item.status === status;
+
       return matchesQuery && matchesStatus;
     });
 
     resultCount.textContent = `${matches.length} item(s)`;
+
     if (matches.length === 0) {
-      showEmpty(container, allItems.length === 0
-        ? "No reports have been submitted yet."
-        : "No matching reports found. Try another search.");
+      showEmpty(
+        container,
+        allItems.length === 0
+          ? "No reports have been submitted yet."
+          : "No matching reports found. Try another search."
+      );
       return;
     }
 
     container.replaceChildren();
-    matches.forEach(item => container.appendChild(createItemCard(item)));
+
+    matches.forEach(item => {
+      container.appendChild(createItemCard(item));
+    });
   }
 
+  let refreshInProgress = false;
+
   async function refreshReports() {
+    if (refreshInProgress) return;
+
+    refreshInProgress = true;
+
     try {
       allItems = await loadItems();
       updateResults();
     } catch (error) {
       resultCount.textContent = "Unable to load";
-      showEmpty(container, `Could not load reports. ${error.message}`);
+
+      showEmpty(
+        container,
+        `Could not load reports. ${error.message}`
+      );
+    } finally {
+      refreshInProgress = false;
     }
   }
 
   searchInput.addEventListener("input", updateResults);
-  statusFilter.addEventListener("change", updateResults);
+
+  statusFilter.addEventListener(
+    "change",
+    updateResults
+  );
+
   refreshReports();
 
-  // Refresh periodically so an already-open browse page can pick up reports
-  // submitted from another device. Reloading the page also fetches fresh data.
+  // Refresh reports every 20 seconds.
   window.setInterval(refreshReports, 20000);
 }
 
 function setupReportForm() {
   const form = document.getElementById("reportForm");
   const message = document.getElementById("formMessage");
-  const submitButton = form.querySelector('button[type="submit"]');
-  const otherRadio = document.getElementById("otherLocationRadio");
-  const otherInput = document.getElementById("otherLocation");
-  const locationRadios = form.querySelectorAll('input[name="itemLocation"]');
+
+  if (!form || !message) return;
+
+  const submitButton =
+    form.querySelector('button[type="submit"]');
+
+  const otherRadio =
+    document.getElementById("otherLocationRadio");
+
+  const otherInput =
+    document.getElementById("otherLocation");
+
+  const locationRadios =
+    form.querySelectorAll('input[name="itemLocation"]');
 
   function updateOtherLocation() {
+    if (!otherRadio || !otherInput) return;
+
     const isOther = otherRadio.checked;
+
     otherInput.disabled = !isOther;
     otherInput.required = isOther;
-    if (!isOther) otherInput.value = "";
+
+    if (!isOther) {
+      otherInput.value = "";
+    }
   }
 
-  locationRadios.forEach(radio => radio.addEventListener("change", updateOtherLocation));
+  locationRadios.forEach(radio => {
+    radio.addEventListener(
+      "change",
+      updateOtherLocation
+    );
+  });
+
   updateOtherLocation();
 
   form.addEventListener("submit", async event => {
     event.preventDefault();
     message.textContent = "";
 
-    if (!db) {
-      message.textContent = "The shared database is not configured yet. Add the Supabase Project URL and public key to app.js.";
+    if (!isDatabaseConfigured()) {
+      message.textContent =
+        "The Supabase Project URL or Publishable key is missing in app.js.";
       return;
     }
 
-    const type = form.querySelector('input[name="itemType"]:checked')?.value;
-    const name = document.getElementById("itemName").value.trim();
-    const description = document.getElementById("itemDescription").value.trim();
-    const selectedLocation = form.querySelector('input[name="itemLocation"]:checked')?.value;
-    const location = selectedLocation === "Other" ? otherInput.value.trim() : selectedLocation;
-    const date = document.getElementById("itemDate").value;
-    const claimLocation = document.getElementById("claimLocation").value.trim();
+    const type = form.querySelector(
+      'input[name="itemType"]:checked'
+    )?.value;
 
-    if (!type || !name || !description || !location || !date || !claimLocation) {
-      message.textContent = "Please complete all required questions.";
+    const name =
+      document.getElementById("itemName")?.value.trim() || "";
+
+    const description =
+      document.getElementById("itemDescription")?.value.trim() || "";
+
+    const selectedLocation = form.querySelector(
+      'input[name="itemLocation"]:checked'
+    )?.value;
+
+    const location = selectedLocation === "Other"
+      ? (otherInput?.value.trim() || "")
+      : (selectedLocation || "");
+
+    const date =
+      document.getElementById("itemDate")?.value || "";
+
+    const claimLocation =
+      document.getElementById("claimLocation")?.value.trim() || "";
+
+    if (
+      !type ||
+      !name ||
+      !description ||
+      !location ||
+      !date ||
+      !claimLocation
+    ) {
+      message.textContent =
+        "Please complete all required questions.";
       return;
     }
 
-    submitButton.disabled = true;
-    submitButton.textContent = "Submitting…";
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = "Submitting…";
+    }
+
+    message.textContent = "Submitting report…";
 
     try {
-      const { error } = await db.from(REPORTS_TABLE).insert({
+      await insertItem({
         item_type: type,
         item_name: name,
         description,
@@ -222,20 +406,35 @@ function setupReportForm() {
         created_at: new Date().toISOString()
       });
 
-      if (error) throw error;
       form.reset();
       updateOtherLocation();
-      message.textContent = "Report submitted successfully and saved to the shared database!";
-      window.setTimeout(() => { window.location.href = "browse.html"; }, 900);
+
+      message.textContent =
+        "Report submitted successfully and saved to the shared database!";
+
+      window.setTimeout(() => {
+        window.location.href = "browse.html";
+      }, 900);
     } catch (error) {
-      message.textContent = `Could not submit the report: ${error.message}`;
+      message.textContent =
+        `Could not submit the report: ${error.message}`;
     } finally {
-      submitButton.disabled = false;
-      submitButton.textContent = "Submit Report";
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = "Submit Report";
+      }
     }
   });
 }
 
-if (document.getElementById("totalCount")) renderHome();
-if (document.getElementById("browseItems")) renderBrowse();
-if (document.getElementById("reportForm")) setupReportForm();
+if (document.getElementById("totalCount")) {
+  renderHome();
+}
+
+if (document.getElementById("browseItems")) {
+  renderBrowse();
+}
+
+if (document.getElementById("reportForm")) {
+  setupReportForm();
+}
