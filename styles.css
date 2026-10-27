@@ -506,3 +506,41 @@ footer {
     padding: 19px 15px;
   }
 }
+.contact-card {
+  background: #f4f7fb;
+  border: 1px solid #dce5f0;
+  border-radius: 16px;
+  padding: 26px;
+  margin: 24px 0;
+  text-align: center;
+}
+
+.contact-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.contact-card h2 {
+  color: #183153;
+  margin-bottom: 12px;
+}
+
+.contact-card p {
+  color: #526174;
+  line-height: 1.6;
+}
+
+.contact-button {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 12px 20px;
+  background: #2457a7;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.contact-button:hover {
+  background: #193f7d;
+}
