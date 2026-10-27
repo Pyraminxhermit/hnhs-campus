@@ -1,28 +1,22 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Browse Items | CampusFind</title>
+  <title>Browse Items | HNHS Campus</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header class="navbar">
     <a class="brand" href="index.html">
-      <span class="brand-icon">CF</span>
-      <span>CampusFind<small>SCHOOL LOST & FOUND</small></span>
+      <span class="brand-icon">HN</span>
+      <span>HNHS Campus<small>SCHOOL LOST &amp; FOUND</small></span>
     </a>
-   
-<nav>
-  <a class="nav-link" href="index.html">Home</a>
-  <a class="nav-link active" href="browse.html">Browse Items</a>
-  <a class="nav-link" href="report.html">Report an Item</a>
-  <a class="nav-link" href="admin.html">Admin</a>
-</nav>
+    <nav>
       <a class="nav-link" href="index.html">Home</a>
       <a class="nav-link active" href="browse.html">Browse Items</a>
       <a class="nav-link" href="report.html">Report an Item</a>
+      <a class="nav-link" href="admin.html">Admin</a>
     </nav>
   </header>
 
@@ -32,12 +26,33 @@
       <h1>Browse reports</h1>
       <p>Search for lost and found belongings reported around your school.</p>
     </section>
+<section class="contact-card">
+  <div class="contact-icon">💬</div>
 
+  <h2>Need Help Finding Your Item?</h2>
+
+  <p>
+    Found your lost belonging listed here?
+    Have questions about a report? Contact the
+    HNHS Campus website developer for assistance.
+  </p>
+
+  <p><strong>Website Developer:</strong> Nathaniel Fortz</p>
+
+  <p><strong>Contact:</strong> Facebook Messenger</p>
+
+  <a
+    class="contact-button"
+    href="https://www.facebook.com/john.fort.587027/"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    Message Me on Facebook
+  </a>
+</section>
     <section class="search-panel">
       <label for="searchInput">Search by item or location</label>
-      <input id="searchInput" type="search"
-        placeholder="e.g. water bottle, library, classroom">
-
+      <input id="searchInput" type="search" placeholder="e.g. water bottle, library, classroom">
       <label for="statusFilter">Filter by report status</label>
       <select id="statusFilter">
         <option value="all">All reports</option>
@@ -50,11 +65,11 @@
       <h2>Reported items</h2>
       <span id="resultCount" class="muted"></span>
     </div>
-
-    <div id="browseItems" class="item-grid"></div>
+    <div id="browseItems" class="item-grid" aria-live="polite"></div>
   </main>
 
-  <footer>CampusFind · School Lost & Found Prototype</footer>
+  <footer>HNHS Campus · School Lost &amp; Found Prototype</footer>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
 </body>
 </html>
