@@ -544,3 +544,53 @@ footer {
 .contact-button:hover {
   background: #193f7d;
 }
+
+.contact-section {
+  max-width: 734px;
+  margin: 40px auto;
+  padding: 32px;
+  text-align: center;
+  background: #edf6f0;
+  border: 1px solid #dce9df;
+  border-radius: 18px;
+}
+
+.contact-section .section-label {
+  color: #167052;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.contact-section h2 {
+  color: #202b26;
+  font-size: 28px;
+  margin: 12px 0;
+}
+
+.contact-section p {
+  color: #68766e;
+  line-height: 1.7;
+}
+
+.contact-card {
+  margin-top: 24px;
+  padding: 22px;
+  background: white;
+  border-radius: 12px;
+}
+
+.contact-button {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 12px 20px;
+  background: #176b50;
+  color: white;
+  text-decoration: none;
+  font-weight: 700;
+  border-radius: 8px;
+}
+
+.contact-button:hover {
+  background: #10553e;
+}
